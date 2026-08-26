@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "markdown-link-resolver"
-version = "0.1.0"
+version = "0.2.0"
 description = "A lightweight micro-tool to resolve relative links and image paths in Markdown files."
 readme = "README.md"
 requires-python = ">=3.7"
