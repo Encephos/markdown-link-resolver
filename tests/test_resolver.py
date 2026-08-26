@@ -39,7 +39,7 @@ class TestMarkdownLinkResolver(unittest.TestCase):
         self.assertEqual(resolve_markdown_links(md, self.base_url), expected)
 
     # ==========================================
-    # 3. Neue Tests (Base64 Inlining mit Mocks)
+    # 3. Base64 Inlining mit Mocks
     # ==========================================
     @patch('urllib.request.urlopen')
     def test_inline_markdown_image(self, mock_urlopen):
@@ -82,6 +82,40 @@ class TestMarkdownLinkResolver(unittest.TestCase):
         
         result = resolve_markdown_links(md, self.base_url, inline_images=True)
         self.assertEqual(result, expected)
+
+    # ==========================================
+    # 4. NEU: HTTP Header & Authentifizierung
+    # ==========================================
+    @patch('urllib.request.urlopen')
+    def test_custom_headers_are_passed(self, mock_urlopen):
+        # Wir simulieren eine erfolgreiche Server-Antwort
+        mock_response = MagicMock()
+        mock_response.read.return_value = b"fake_image_bytes"
+        # Diesmal mocken wir auch den get() Aufruf für die Header (Content-Type Fallback)
+        mock_response.headers.get.return_value = 'image/png'
+        mock_urlopen.return_value.__enter__.return_value = mock_response
+
+        md = "![Image](https://api.private-server.com/image.png)"
+        custom_headers = {"Authorization": "Bearer TEST_TOKEN"}
+
+        # Funktion aufrufen
+        resolve_markdown_links(
+            md, 
+            base_url=self.base_url, 
+            inline_images=True, 
+            headers=custom_headers
+        )
+
+        # Überprüfen, was an urlopen übergeben wurde
+        # call_args[0][0] greift auf das erste Argument des urllib.request.urlopen Aufrufs zu (das Request-Objekt)
+        request_object = mock_urlopen.call_args[0][0]
+        passed_headers = request_object.headers
+        
+        # Testen, ob unsere Custom-Header im Request angekommen sind
+        self.assertIn('Authorization', passed_headers)
+        self.assertEqual(passed_headers['Authorization'], "Bearer TEST_TOKEN")
+        # Testen, ob der Standard-User-Agent überschrieben/beibehalten wurde (urllib macht Keys lowercase)
+        self.assertEqual(passed_headers['User-agent'], "MarkdownLinkResolver/1.2")
 
 if __name__ == '__main__':
     unittest.main()
