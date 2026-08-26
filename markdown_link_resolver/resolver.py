@@ -39,9 +39,7 @@ def resolve_markdown_links(markdown_text: str, base_url: str, inline_images: boo
     Unterstützt benutzerdefinierte HTTP-Headers (z.B. für Authentifizierung).
     """
     
-    # ==========================================
     # 1. Native Markdown-Links und -Bilder
-    # ==========================================
     md_pattern = re.compile(r'(!?\[.*?\])\(\s*([^\s)]+)(?:\s+([^)]+))?\s*\)')
     
     def md_repl(match):
@@ -65,9 +63,7 @@ def resolve_markdown_links(markdown_text: str, base_url: str, inline_images: boo
 
     resolved_md = md_pattern.sub(md_repl, markdown_text)
 
-    # ==========================================
     # 2. HTML <a> und <img> Tags im Markdown
-    # ==========================================
     # Sucht nach <a ... href="url"> oder <img ... src="url">
     html_pattern = re.compile(r'(<(?:a|img)\b[^>]*\b(?:href|src)\s*=\s*)(["\'])(.*?)\2', re.IGNORECASE)
     
